@@ -4,244 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - FF Tournament</title>
+    
+    <!-- CSS & Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
-    <style>
-        :root {
-            --admin-primary: #2c3e50;
-            --admin-secondary: #34495e;
-            --admin-accent: #3498db;
-            --admin-success: #27ae60;
-            --admin-warning: #f39c12;
-            --admin-danger: #e74c3c;
-        }
-        
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .admin-header {
-            background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
-            color: white;
-            padding: 12px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .sidebar {
-            background: white;
-            min-height: calc(100vh - 70px);
-            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
-            position: fixed;
-            width: 220px;
-            overflow-y: auto;
-        }
-        
-        .main-content {
-            margin-left: 220px;
-            padding: 20px;
-            min-height: calc(100vh - 70px);
-        }
-        
-        .sidebar-logo {
-            padding: 20px 15px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .sidebar-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .sidebar-menu li {
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .sidebar-menu a {
-            display: block;
-            padding: 12px 15px;
-            color: #555;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-        
-        .sidebar-menu a:hover {
-            background: #f8f9fa;
-            color: var(--admin-accent);
-            border-left: 3px solid var(--admin-accent);
-        }
-        
-        .sidebar-menu a.active {
-            background: #e3f2fd;
-            color: var(--admin-accent);
-            border-left: 3px solid var(--admin-accent);
-        }
-        
-        .sidebar-menu i {
-            width: 20px;
-            text-align: center;
-            margin-right: 8px;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            border-left: 4px solid var(--admin-accent);
-        }
-        
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            float: left;
-            margin-right: 15px;
-        }
-        
-        .icon-users { background: #e3f2fd; color: #2196f3; }
-        .icon-tournament { background: #e8f5e9; color: #4caf50; }
-        .icon-payment { background: #fff3e0; color: #ff9800; }
-        .icon-profit { background: #f3e5f5; color: #9c27b0; }
-        
-        .table-container {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            margin-bottom: 15px;
-        }
-        
-        .btn-admin {
-            background: var(--admin-accent);
-            color: white;
-            border: none;
-            padding: 6px 15px;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        
-        .btn-admin:hover {
-            background: #2980b9;
-            color: white;
-        }
-        
-        .btn-success { background: var(--admin-success); }
-        .btn-warning { background: var(--admin-warning); }
-        .btn-danger { background: var(--admin-danger); }
-        
-        .status-badge {
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-        
-        .status-pending { background: #fff3cd; color: #856404; }
-        .status-approved { background: #d4edda; color: #155724; }
-        .status-rejected { background: #f8d7da; color: #721c24; }
-        .status-live { background: #d1ecf1; color: #0c5460; }
-        .status-upcoming { background: #d6d8d9; color: #383d41; }
-        .status-completed { background: #d4edda; color: #155724; }
-        .status-joined { background: #cce5ff; color: #004085; }
-        
-        .modal-header-admin {
-            background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
-            color: white;
-        }
-        
-        .notification-badge {
-            background: var(--admin-danger);
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 10px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 5px;
-        }
-        
-        .loading-spinner {
-            border: 3px solid rgba(0,0,0,0.1);
-            border-radius: 50%;
-            border-top: 3px solid var(--admin-accent);
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .payment-method-badge {
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            margin-right: 5px;
-        }
-        
-        .bkash { background: #e2136e; color: white; }
-        .nagad { background: #f8a01c; color: #000; }
-        .rocket { background: #5d2d8d; color: white; }
-        .upay { background: #00a859; color: white; }
-        
-        .tournament-type-badge {
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 10px;
-            margin-left: 5px;
-        }
-        
-        .type-solo { background: #3498db; color: white; }
-        .type-duo { background: #9b59b6; color: white; }
-        .type-squad { background: #e74c3c; color: white; }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                position: relative;
-                min-height: auto;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-        }
-    </style>
-    
-    <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCN_MH6u2Bpo3bxfDC_dhC19U67LP8ZS_E",
-            authDomain: "free-fire-22cac.firebaseapp.com",
-            databaseURL: "https://free-fire-22cac-default-rtdb.firebaseio.com",
-            projectId: "free-fire-22cac",
-            storageBucket: "free-fire-22cac.firebasestorage.app",
-            messagingSenderId: "554987602894",
-            appId: "1:554987602894:web:51548645a15c0d1e8d619f",
-            measurementId: "G-W2QYY1CQ8D"
-        };
-        
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-    </script>
+    <link rel="stylesheet" href="admin-style.css">
 </head>
 <body>
     <!-- Admin Header -->
@@ -250,25 +23,29 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="mb-0"><i class="fas fa-user-shield"></i> Admin Panel</h5>
+                    <small class="opacity-75" id="adminWelcome">FF Tournament Management</small>
                 </div>
                 
                 <div class="d-flex align-items-center">
+                    <!-- Notifications -->
                     <div class="dropdown me-3">
                         <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
                             <i class="fas fa-bell"></i>
                             <span class="notification-badge" id="notificationCount">0</span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end" id="notificationsList">
+                        <ul class="dropdown-menu dropdown-menu-end" id="notificationsList" style="min-width: 300px;">
                             <li><h6 class="dropdown-header">Notifications</h6></li>
+                            <div id="notificationItems"></div>
                         </ul>
                     </div>
                     
+                    <!-- Admin Profile -->
                     <div class="dropdown">
                         <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle"></i> Admin
+                            <i class="fas fa-user-circle"></i> <span id="adminUsernameDisplay">Admin</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="user-panel.html">
+                            <li><a class="dropdown-item" href="../index.html" target="_blank">
                                 <i class="fas fa-home"></i> User Panel
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
@@ -289,6 +66,10 @@
                 <div class="sidebar-logo">
                     <h6><i class="fas fa-fire text-danger"></i> FF Tournament</h6>
                     <small class="text-muted">Admin Control Panel</small>
+                    <div class="mt-2">
+                        <small class="text-success"><i class="fas fa-circle"></i> Online</small>
+                        <small class="ms-2 text-muted" id="currentTime"></small>
+                    </div>
                 </div>
                 
                 <ul class="sidebar-menu">
@@ -299,7 +80,10 @@
                         <i class="fas fa-users"></i> User Management
                     </a></li>
                     <li><a href="#" onclick="showSection('tournaments')">
-                        <i class="fas fa-trophy"></i> Tournament Management
+                        <i class="fas fa-trophy"></i> Tournaments
+                    </a></li>
+                    <li><a href="#" onclick="showSection('participants')">
+                        <i class="fas fa-user-friends"></i> Participants
                     </a></li>
                     <li><a href="#" onclick="showSection('recharge')">
                         <i class="fas fa-money-check-alt"></i> Recharge Requests
@@ -309,37 +93,74 @@
                         <i class="fas fa-money-bill-wave"></i> Withdrawal Requests
                         <span class="notification-badge float-end" id="withdrawNotification">0</span>
                     </a></li>
-                    <li><a href="#" onclick="showSection('paymentMethods')">
-                        <i class="fas fa-credit-card"></i> Payment Methods
+                    <li><a href="#" onclick="showSection('results')">
+                        <i class="fas fa-flag-checkered"></i> Tournament Results
                     </a></li>
                     <li><a href="#" onclick="showSection('notice')">
                         <i class="fas fa-bullhorn"></i> Notice Management
                     </a></li>
-                    <li><a href="#" onclick="showSection('results')">
-                        <i class="fas fa-flag-checkered"></i> Tournament Results
-                    </a></li>
                     <li><a href="#" onclick="showSection('settings')">
                         <i class="fas fa-cog"></i> Settings
                     </a></li>
+                    <li><a href="#" onclick="showSection('logs')">
+                        <i class="fas fa-history"></i> System Logs
+                    </a></li>
                 </ul>
+                
+                <!-- Quick Stats Footer -->
+                <div class="sidebar-footer">
+                    <small class="text-muted">Total Users: <span id="sidebarTotalUsers">0</span></small><br>
+                    <small class="text-muted">Active Tournaments: <span id="sidebarActiveTournaments">0</span></small>
+                </div>
             </nav>
 
             <!-- Main Content -->
             <main class="main-content" id="mainContent">
-                <!-- Admin Login Section -->
+                <!-- Login Section -->
                 <section id="loginSection">
                     <div class="row justify-content-center mt-5">
                         <div class="col-md-4">
                             <div class="table-container text-center">
-                                <h5 class="mb-3"><i class="fas fa-user-shield"></i> Admin Login</h5>
-                                <div class="mb-3">
-                                    <input type="text" class="form-control" id="adminUsername" value="admin123" readonly>
+                                <div class="mb-4">
+                                    <i class="fas fa-user-shield fa-3x text-primary"></i>
+                                    <h4 class="mt-3">Admin Login</h4>
+                                    <p class="text-muted">Enter your credentials to access the admin panel</p>
                                 </div>
+                                
                                 <div class="mb-3">
-                                    <input type="password" class="form-control" id="adminPassword" placeholder="Enter password">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                        <input type="text" class="form-control" id="adminUsername" value="admin" readonly>
+                                    </div>
                                 </div>
-                                <button class="btn btn-admin w-100" onclick="adminLogin()">Login</button>
-                                <p class="mt-2 small text-muted">Default: 123456</p>
+                                
+                                <div class="mb-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                        <input type="password" class="form-control" id="adminPassword" placeholder="Enter password">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3 text-start">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="rememberMe" checked>
+                                        <label class="form-check-label small">Remember me</label>
+                                    </div>
+                                </div>
+                                
+                                <button class="btn btn-admin w-100" onclick="adminLogin()">
+                                    <i class="fas fa-sign-in-alt"></i> Login to Admin Panel
+                                </button>
+                                
+                                <div class="mt-3">
+                                    <p class="small text-muted mb-0">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Default password: <code>123456</code>
+                                    </p>
+                                    <p class="small text-muted">
+                                        Change after first login from Settings
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -347,81 +168,172 @@
 
                 <!-- Dashboard Section -->
                 <section id="dashboardSection" class="d-none">
-                    <h5 class="mb-3"><i class="fas fa-tachometer-alt"></i> Dashboard</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5><i class="fas fa-tachometer-alt"></i> Dashboard</h5>
+                        <div class="d-flex">
+                            <button class="btn btn-admin btn-sm me-2" data-bs-toggle="modal" data-bs-target="#createTournamentModal">
+                                <i class="fas fa-plus"></i> Create Tournament
+                            </button>
+                            <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addNoticeModal">
+                                <i class="fas fa-bullhorn"></i> Add Notice
+                            </button>
+                        </div>
+                    </div>
                     
+                    <!-- Statistics Cards -->
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-3 col-6 mb-3">
                             <div class="stat-card">
                                 <div class="stat-icon icon-users">
                                     <i class="fas fa-users"></i>
                                 </div>
-                                <h5 id="totalUsers">0</h5>
-                                <small>Total Users</small>
+                                <div class="stat-info">
+                                    <h3 id="totalUsers">0</h3>
+                                    <small>Total Users</small>
+                                    <div class="stat-trend" id="userTrend">
+                                        <i class="fas fa-arrow-up text-success"></i> 0% today
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="col-md-3">
+                        <div class="col-md-3 col-6 mb-3">
                             <div class="stat-card">
                                 <div class="stat-icon icon-tournament">
                                     <i class="fas fa-trophy"></i>
                                 </div>
-                                <h5 id="totalTournaments">0</h5>
-                                <small>Tournaments</small>
+                                <div class="stat-info">
+                                    <h3 id="totalTournaments">0</h3>
+                                    <small>Tournaments</small>
+                                    <div class="stat-trend">
+                                        <span class="badge bg-success" id="liveTournaments">0 Live</span>
+                                        <span class="badge bg-warning ms-1" id="upcomingTournaments">0 Upcoming</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="col-md-3">
+                        <div class="col-md-3 col-6 mb-3">
                             <div class="stat-card">
                                 <div class="stat-icon icon-payment">
                                     <i class="fas fa-money-bill-wave"></i>
                                 </div>
-                                <h5 id="totalRevenue">৳ 0</h5>
-                                <small>Total Revenue</small>
+                                <div class="stat-info">
+                                    <h3 id="totalRevenue">৳0</h3>
+                                    <small>Total Revenue</small>
+                                    <div class="stat-trend">
+                                        <i class="fas fa-wallet text-info"></i> <span id="todayRevenue">৳0 today</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="col-md-3">
+                        <div class="col-md-3 col-6 mb-3">
                             <div class="stat-card">
                                 <div class="stat-icon icon-profit">
                                     <i class="fas fa-chart-pie"></i>
                                 </div>
-                                <h5 id="pendingRequests">0</h5>
-                                <small>Pending Requests</small>
+                                <div class="stat-info">
+                                    <h3 id="pendingRequests">0</h3>
+                                    <small>Pending Requests</small>
+                                    <div class="stat-trend">
+                                        <span class="badge bg-warning" id="pendingRecharge">0 Recharge</span>
+                                        <span class="badge bg-danger ms-1" id="pendingWithdraw">0 Withdraw</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Quick Actions -->
-                    <div class="table-container mt-3">
-                        <h6><i class="fas fa-bolt"></i> Quick Actions</h6>
-                        <div class="row mt-2">
-                            <div class="col-md-3 mb-2">
-                                <button class="btn btn-admin w-100" data-bs-toggle="modal" data-bs-target="#createTournamentModal">
-                                    <i class="fas fa-plus"></i> Create Tournament
-                                </button>
+                    <!-- Quick Stats -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="table-container">
+                                <h6><i class="fas fa-chart-line"></i> Platform Statistics</h6>
+                                <div class="row mt-3">
+                                    <div class="col-6">
+                                        <p class="stat-item">
+                                            <span class="stat-label">Active Users</span>
+                                            <span class="stat-value" id="activeUsers">0</span>
+                                        </p>
+                                        <p class="stat-item">
+                                            <span class="stat-label">Total Deposits</span>
+                                            <span class="stat-value" id="totalDeposits">৳0</span>
+                                        </p>
+                                        <p class="stat-item">
+                                            <span class="stat-label">Total Withdrawals</span>
+                                            <span class="stat-value" id="totalWithdrawals">৳0</span>
+                                        </p>
+                                    </div>
+                                    <div class="col-6">
+                                        <p class="stat-item">
+                                            <span class="stat-label">Total Matches</span>
+                                            <span class="stat-value" id="totalMatches">0</span>
+                                        </p>
+                                        <p class="stat-item">
+                                            <span class="stat-label">Total Prize</span>
+                                            <span class="stat-value" id="totalPrize">৳0</span>
+                                        </p>
+                                        <p class="stat-item">
+                                            <span class="stat-label">System Profit</span>
+                                            <span class="stat-value text-success" id="systemProfit">৳0</span>
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-3 mb-2">
-                                <button class="btn btn-success w-100" onclick="showSection('recharge')">
-                                    <i class="fas fa-money-check"></i> Manage Recharge
-                                </button>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <button class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#addNoticeModal">
-                                    <i class="fas fa-bullhorn"></i> Add Notice
-                                </button>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <button class="btn btn-info w-100" onclick="showSection('paymentMethods')">
-                                    <i class="fas fa-credit-card"></i> Payment Methods
-                                </button>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="table-container">
+                                <h6><i class="fas fa-bolt"></i> Quick Actions</h6>
+                                <div class="row mt-2">
+                                    <div class="col-6 mb-2">
+                                        <button class="btn btn-admin w-100" onclick="showSection('users')">
+                                            <i class="fas fa-user-plus"></i> Add User
+                                        </button>
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <button class="btn btn-success w-100" onclick="showSection('recharge')">
+                                            <i class="fas fa-money-check"></i> Manage Recharge
+                                        </button>
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <button class="btn btn-warning w-100" onclick="showSection('results')">
+                                            <i class="fas fa-flag-checkered"></i> View Results
+                                        </button>
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <button class="btn btn-info w-100" onclick="showSection('participants')">
+                                            <i class="fas fa-user-friends"></i> Participants
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Recent Tournaments -->
-                    <div class="table-container mt-3">
-                        <h6><i class="fas fa-history"></i> Recent Tournaments</h6>
+                    <div class="table-container">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6><i class="fas fa-history"></i> Recent Tournaments</h6>
+                            <button class="btn btn-sm btn-outline-primary" onclick="showSection('tournaments')">
+                                View All
+                            </button>
+                        </div>
                         <div id="recentTournaments">
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Users -->
+                    <div class="table-container mt-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6><i class="fas fa-user-clock"></i> Recently Registered Users</h6>
+                            <button class="btn btn-sm btn-outline-primary" onclick="showSection('users')">
+                                View All
+                            </button>
+                        </div>
+                        <div id="recentUsers">
                             <div class="loading-spinner"></div>
                         </div>
                     </div>
@@ -431,16 +343,46 @@
                 <section id="usersSection" class="d-none">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5><i class="fas fa-users"></i> User Management</h5>
-                        <button class="btn btn-admin btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                            <i class="fas fa-user-plus"></i> Add User
-                        </button>
+                        <div class="d-flex">
+                            <button class="btn btn-admin btn-sm me-2" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                                <i class="fas fa-user-plus"></i> Add User
+                            </button>
+                            <button class="btn btn-success btn-sm" onclick="exportUsers()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
                     </div>
                     
-                    <div class="table-container">
-                        <div class="mb-3">
-                            <input type="text" class="form-control form-control-sm" placeholder="Search users..." id="searchUsers" onkeyup="displayUsers()">
+                    <!-- User Filters -->
+                    <div class="table-container mb-3">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <input type="text" class="form-control form-control-sm" placeholder="Search users..." id="searchUsers" onkeyup="filterUsers()">
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <select class="form-select form-select-sm" id="userFilter" onchange="filterUsers()">
+                                    <option value="all">All Users</option>
+                                    <option value="today">Today Registered</option>
+                                    <option value="active">Active (Balance > 0)</option>
+                                    <option value="inactive">Inactive (Balance = 0)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <select class="form-select form-select-sm" id="userSort" onchange="filterUsers()">
+                                    <option value="newest">Newest First</option>
+                                    <option value="oldest">Oldest First</option>
+                                    <option value="balance_high">Balance (High to Low)</option>
+                                    <option value="balance_low">Balance (Low to High)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <input type="number" class="form-control form-control-sm" placeholder="Min Balance" id="minBalance" onchange="filterUsers()">
+                            </div>
                         </div>
-                        
+                    </div>
+                    
+                    <!-- Users Table -->
+                    <div class="table-container">
                         <div id="usersTable">
                             <div class="loading-spinner"></div>
                         </div>
@@ -451,31 +393,151 @@
                 <section id="tournamentsSection" class="d-none">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5><i class="fas fa-trophy"></i> Tournament Management</h5>
-                        <button class="btn btn-admin btn-sm" data-bs-toggle="modal" data-bs-target="#createTournamentModal">
-                            <i class="fas fa-plus"></i> Create Tournament
-                        </button>
+                        <div class="d-flex">
+                            <button class="btn btn-admin btn-sm me-2" data-bs-toggle="modal" data-bs-target="#createTournamentModal">
+                                <i class="fas fa-plus"></i> Create Tournament
+                            </button>
+                            <button class="btn btn-success btn-sm" onclick="exportTournaments()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
                     </div>
                     
-                    <div class="table-container">
-                        <div class="mb-3">
-                            <div class="btn-group btn-group-sm">
-                                <button class="btn btn-outline-primary active" onclick="filterTournaments('all')">All</button>
-                                <button class="btn btn-outline-warning" onclick="filterTournaments('upcoming')">Upcoming</button>
-                                <button class="btn btn-outline-danger" onclick="filterTournaments('live')">Live</button>
-                                <button class="btn btn-outline-success" onclick="filterTournaments('completed')">Completed</button>
+                    <!-- Tournament Filters -->
+                    <div class="table-container mb-3">
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <input type="text" class="form-control form-control-sm" placeholder="Search tournaments..." id="searchTournaments" onkeyup="filterTournaments()">
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <select class="form-select form-select-sm" id="tournamentTypeFilter" onchange="filterTournaments()">
+                                    <option value="all">All Types</option>
+                                    <option value="solo">Solo</option>
+                                    <option value="duo">Duo</option>
+                                    <option value="squad">Squad</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <select class="form-select form-select-sm" id="tournamentStatusFilter" onchange="filterTournaments()">
+                                    <option value="all">All Status</option>
+                                    <option value="upcoming">Upcoming</option>
+                                    <option value="live">Live</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <input type="date" class="form-control form-control-sm" id="tournamentDateFilter" onchange="filterTournaments()">
                             </div>
                         </div>
-                        
+                    </div>
+                    
+                    <!-- Tournaments Table -->
+                    <div class="table-container">
                         <div id="tournamentsTable">
                             <div class="loading-spinner"></div>
                         </div>
                     </div>
                 </section>
 
+                <!-- Participants Management Section -->
+                <section id="participantsSection" class="d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5><i class="fas fa-user-friends"></i> Tournament Participants</h5>
+                        <div class="d-flex">
+                            <select class="form-select form-select-sm me-2" id="participantsTournamentFilter" onchange="loadParticipants()" style="width: 250px;">
+                                <option value="">Select Tournament</option>
+                            </select>
+                            <button class="btn btn-success btn-sm me-2" onclick="exportParticipants()" id="exportParticipantsBtn" disabled>
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                            <button class="btn btn-info btn-sm" onclick="refreshParticipants()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Tournament Info -->
+                    <div class="table-container mb-3 d-none" id="tournamentInfoCard">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 id="selectedTournamentTitle"></h6>
+                                <div class="d-flex flex-wrap">
+                                    <span class="badge me-2 mb-1" id="selectedTournamentStatus"></span>
+                                    <span class="badge bg-info me-2 mb-1" id="selectedTournamentType"></span>
+                                    <span class="text-muted me-3 mb-1"><i class="fas fa-calendar"></i> <span id="selectedTournamentDate"></span></span>
+                                    <span class="text-muted me-3 mb-1"><i class="fas fa-users"></i> <span id="selectedTournamentPlayers"></span></span>
+                                    <span class="text-success me-3 mb-1"><i class="fas fa-trophy"></i> ৳<span id="selectedTournamentPrize"></span></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-warning" onclick="editSelectedTournament()">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteSelectedTournament()">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Participants Table -->
+                    <div class="table-container">
+                        <div id="participantsTable">
+                            <div class="text-center py-5">
+                                <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">Select a tournament to view participants</h6>
+                                <p class="small text-muted">Choose a tournament from the dropdown above</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Recharge Requests Section -->
                 <section id="rechargeSection" class="d-none">
-                    <h5 class="mb-3"><i class="fas fa-money-check-alt"></i> Recharge Requests</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5><i class="fas fa-money-check-alt"></i> Recharge Requests</h5>
+                        <div class="d-flex">
+                            <button class="btn btn-success btn-sm me-2" onclick="approveAllRecharge()" id="approveAllBtn">
+                                <i class="fas fa-check-double"></i> Approve All
+                            </button>
+                            <button class="btn btn-warning btn-sm" onclick="exportRechargeRequests()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                    </div>
                     
+                    <!-- Recharge Filters -->
+                    <div class="table-container mb-3">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <select class="form-select form-select-sm" id="rechargeStatusFilter" onchange="filterRechargeRequests()">
+                                    <option value="all">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <input type="date" class="form-control form-control-sm" id="rechargeDateFilter" onchange="filterRechargeRequests()">
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <select class="form-select form-select-sm" id="rechargeMethodFilter" onchange="filterRechargeRequests()">
+                                    <option value="all">All Methods</option>
+                                    <option value="bkash">bKash</option>
+                                    <option value="nagad">Nagad</option>
+                                    <option value="rocket">Rocket</option>
+                                    <option value="upay">Upay</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <input type="number" class="form-control form-control-sm" placeholder="Min Amount" id="rechargeMinAmount" onchange="filterRechargeRequests()">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recharge Requests Table -->
                     <div class="table-container">
                         <div id="rechargeRequestsTable">
                             <div class="loading-spinner"></div>
@@ -485,8 +547,48 @@
 
                 <!-- Withdrawal Requests Section -->
                 <section id="withdrawSection" class="d-none">
-                    <h5 class="mb-3"><i class="fas fa-money-bill-wave"></i> Withdrawal Requests</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5><i class="fas fa-money-bill-wave"></i> Withdrawal Requests</h5>
+                        <div class="d-flex">
+                            <button class="btn btn-success btn-sm me-2" onclick="approveAllWithdraw()" id="approveAllWithdrawBtn">
+                                <i class="fas fa-check-double"></i> Approve All
+                            </button>
+                            <button class="btn btn-warning btn-sm" onclick="exportWithdrawRequests()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                    </div>
                     
+                    <!-- Withdraw Filters -->
+                    <div class="table-container mb-3">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <select class="form-select form-select-sm" id="withdrawStatusFilter" onchange="filterWithdrawRequests()">
+                                    <option value="all">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <input type="date" class="form-control form-control-sm" id="withdrawDateFilter" onchange="filterWithdrawRequests()">
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <select class="form-select form-select-sm" id="withdrawMethodFilter" onchange="filterWithdrawRequests()">
+                                    <option value="all">All Methods</option>
+                                    <option value="bkash">bKash</option>
+                                    <option value="nagad">Nagad</option>
+                                    <option value="rocket">Rocket</option>
+                                    <option value="upay">Upay</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <input type="number" class="form-control form-control-sm" placeholder="Min Amount" id="withdrawMinAmount" onchange="filterWithdrawRequests()">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Withdraw Requests Table -->
                     <div class="table-container">
                         <div id="withdrawRequestsTable">
                             <div class="loading-spinner"></div>
@@ -494,18 +596,28 @@
                     </div>
                 </section>
 
-                <!-- Payment Methods Section -->
-                <section id="paymentMethodsSection" class="d-none">
+                <!-- Tournament Results Section -->
+                <section id="resultsSection" class="d-none">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5><i class="fas fa-credit-card"></i> Payment Methods</h5>
-                        <button class="btn btn-admin btn-sm" data-bs-toggle="modal" data-bs-target="#addPaymentMethodModal">
-                            <i class="fas fa-plus"></i> Add Payment Method
-                        </button>
+                        <h5><i class="fas fa-flag-checkered"></i> Tournament Results</h5>
+                        <div class="d-flex">
+                            <select class="form-select form-select-sm me-2" id="resultsTournamentFilter" onchange="loadResults()" style="width: 250px;">
+                                <option value="">Select Tournament</option>
+                            </select>
+                            <button class="btn btn-success btn-sm" onclick="exportResults()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
                     </div>
                     
+                    <!-- Results Table -->
                     <div class="table-container">
-                        <div id="paymentMethodsTable">
-                            <div class="loading-spinner"></div>
+                        <div id="resultsTable">
+                            <div class="text-center py-5">
+                                <i class="fas fa-flag-checkered fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">Select a tournament to view results</h6>
+                                <p class="small text-muted">Only completed tournaments will show results</p>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -514,11 +626,17 @@
                 <section id="noticeSection" class="d-none">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5><i class="fas fa-bullhorn"></i> Notice Management</h5>
-                        <button class="btn btn-admin btn-sm" data-bs-toggle="modal" data-bs-target="#addNoticeModal">
-                            <i class="fas fa-plus"></i> Add Notice
-                        </button>
+                        <div class="d-flex">
+                            <button class="btn btn-admin btn-sm me-2" data-bs-toggle="modal" data-bs-target="#addNoticeModal">
+                                <i class="fas fa-plus"></i> Add Notice
+                            </button>
+                            <button class="btn btn-warning btn-sm" onclick="exportNotices()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
                     </div>
                     
+                    <!-- Notices Table -->
                     <div class="table-container">
                         <div id="noticesTable">
                             <div class="loading-spinner"></div>
@@ -526,52 +644,161 @@
                     </div>
                 </section>
 
-                <!-- Tournament Results Section -->
-                <section id="resultsSection" class="d-none">
-                    <h5 class="mb-3"><i class="fas fa-flag-checkered"></i> Tournament Results</h5>
+                <!-- Settings Section -->
+                <section id="settingsSection" class="d-none">
+                    <h5 class="mb-3"><i class="fas fa-cog"></i> Settings</h5>
                     
-                    <div class="table-container">
-                        <div id="resultsTable">
-                            <div class="loading-spinner"></div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="table-container">
+                                <h6><i class="fas fa-user-shield"></i> Admin Settings</h6>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Admin Username</label>
+                                    <input type="text" class="form-control" id="settingsAdminUsername" value="admin" readonly>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Change Password</label>
+                                    <input type="password" class="form-control" id="newAdminPassword" placeholder="New password">
+                                    <input type="password" class="form-control mt-2" id="confirmAdminPassword" placeholder="Confirm password">
+                                </div>
+                                
+                                <button class="btn btn-admin" onclick="updateAdminSettings()">
+                                    <i class="fas fa-save"></i> Update Admin Settings
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="table-container">
+                                <h6><i class="fas fa-money-bill"></i> Payment Settings</h6>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Minimum Recharge (৳)</label>
+                                    <input type="number" class="form-control" id="minRecharge" value="100" min="10">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Minimum Withdrawal (৳)</label>
+                                    <input type="number" class="form-control" id="minWithdrawal" value="200" min="50">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Default Entry Fee (৳)</label>
+                                    <input type="number" class="form-control" id="defaultEntryFee" value="50" min="10">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Kill Reward (%)</label>
+                                    <input type="number" class="form-control" id="killRewardPercent" value="10" min="1" max="100">
+                                </div>
+                                
+                                <button class="btn btn-admin" onclick="updatePaymentSettings()">
+                                    <i class="fas fa-save"></i> Update Payment Settings
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="table-container">
+                                <h6><i class="fas fa-mobile-alt"></i> Payment Methods</h6>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">bKash Number</label>
+                                    <input type="text" class="form-control" id="bkashNumber" placeholder="017XXXXXXXX">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Nagad Number</label>
+                                    <input type="text" class="form-control" id="nagadNumber" placeholder="018XXXXXXXX">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Rocket Number</label>
+                                    <input type="text" class="form-control" id="rocketNumber" placeholder="019XXXXXXXX">
+                                </div>
+                                
+                                <button class="btn btn-admin" onclick="updatePaymentMethods()">
+                                    <i class="fas fa-save"></i> Update Payment Methods
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="table-container">
+                                <h6><i class="fas fa-info-circle"></i> System Information</h6>
+                                
+                                <div class="system-info">
+                                    <p><strong>Database:</strong> <code id="dbName">free-fire-22cac</code></p>
+                                    <p><strong>Total Users:</strong> <span id="sysTotalUsers">0</span></p>
+                                    <p><strong>Total Tournaments:</strong> <span id="sysTotalTournaments">0</span></p>
+                                    <p><strong>Pending Requests:</strong> <span id="sysPendingRequests">0</span></p>
+                                    <p><strong>System Uptime:</strong> <span id="systemUptime">00:00:00</span></p>
+                                    <p><strong>Last Updated:</strong> <span id="lastUpdated">Never</span></p>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <button class="btn btn-success btn-sm me-2" onclick="refreshSystemInfo()">
+                                        <i class="fas fa-sync-alt"></i> Refresh
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="clearAllCache()">
+                                        <i class="fas fa-trash"></i> Clear Cache
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Settings Section -->
-                <section id="settingsSection" class="d-none">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="table-container">
-                                <h6><i class="fas fa-cog"></i> System Settings</h6>
-                                <div class="mb-3">
-                                    <label class="form-label small">Admin Password</label>
-                                    <input type="password" class="form-control form-control-sm" id="newAdminPassword" placeholder="New password">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label small">Default Entry Fee (৳)</label>
-                                    <input type="number" class="form-control form-control-sm" id="defaultEntryFee" value="100">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label small">Kill Reward %</label>
-                                    <input type="number" class="form-control form-control-sm" id="killRewardPercent" value="10" min="1" max="100">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label small">Minimum Withdrawal (৳)</label>
-                                    <input type="number" class="form-control form-control-sm" id="minWithdrawal" value="200" min="200">
-                                </div>
-                                <button class="btn btn-admin btn-sm" onclick="saveSettings()">Save Settings</button>
+                <!-- System Logs Section -->
+                <section id="logsSection" class="d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5><i class="fas fa-history"></i> System Logs</h5>
+                        <div class="d-flex">
+                            <button class="btn btn-warning btn-sm me-2" onclick="exportLogs()">
+                                <i class="fas fa-download"></i> Export Logs
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="clearOldLogs()">
+                                <i class="fas fa-trash"></i> Clear Old Logs
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Logs Filters -->
+                    <div class="table-container mb-3">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <select class="form-select form-select-sm" id="logTypeFilter" onchange="filterLogs()">
+                                    <option value="all">All Types</option>
+                                    <option value="tournament">Tournament</option>
+                                    <option value="user">User</option>
+                                    <option value="payment">Payment</option>
+                                    <option value="system">System</option>
+                                    <option value="error">Error</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <input type="date" class="form-control form-control-sm" id="logDateFilter" onchange="filterLogs()">
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <input type="text" class="form-control form-control-sm" placeholder="Search logs..." id="searchLogs" onkeyup="filterLogs()">
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <select class="form-select form-select-sm" id="logSort" onchange="filterLogs()">
+                                    <option value="newest">Newest First</option>
+                                    <option value="oldest">Oldest First</option>
+                                </select>
                             </div>
                         </div>
-                        
-                        <div class="col-md-6">
-                            <div class="table-container">
-                                <h6><i class="fas fa-info-circle"></i> System Info</h6>
-                                <p class="small mb-1"><strong>Database:</strong> <code>free-fire-22cac</code></p>
-                                <p class="small mb-1"><strong>Total Users:</strong> <span id="sysTotalUsers">0</span></p>
-                                <p class="small mb-1"><strong>Total Tournaments:</strong> <span id="sysTotalTournaments">0</span></p>
-                                <p class="small mb-1"><strong>Pending Requests:</strong> <span id="sysPendingRequests">0</span></p>
-                                <p class="small mb-1"><strong>System Status:</strong> <span class="text-success">Online</span></p>
-                            </div>
+                    </div>
+                    
+                    <!-- Logs Table -->
+                    <div class="table-container">
+                        <div id="logsTable">
+                            <div class="loading-spinner"></div>
                         </div>
                     </div>
                 </section>
@@ -582,62 +809,77 @@
     <!-- Modals -->
     <!-- Create Tournament Modal -->
     <div class="modal fade" id="createTournamentModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header modal-header-admin">
-                    <h6 class="modal-title"><i class="fas fa-trophy"></i> Create Tournament</h6>
+                    <h6 class="modal-title"><i class="fas fa-trophy"></i> Create New Tournament</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-2">
-                        <label class="form-label small">Tournament Name</label>
-                        <input type="text" class="form-control form-control-sm" id="tournamentName" required>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label small">Type</label>
-                        <select class="form-select form-select-sm" id="tournamentType" required>
-                            <option value="solo">Solo</option>
-                            <option value="duo">Duo (Players can choose solo or duo)</option>
-                            <option value="squad">Squad</option>
-                        </select>
-                    </div>
-                    
                     <div class="row">
-                        <div class="col-6 mb-2">
-                            <label class="form-label small">Entry Fee per Player (৳)</label>
-                            <input type="number" class="form-control form-control-sm" id="entryFee" required min="0">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tournament Name</label>
+                            <input type="text" class="form-control" id="tournamentName" placeholder="e.g., Weekend Solo Showdown" required>
                         </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label small">Total Prize Pool (৳)</label>
-                            <input type="number" class="form-control form-control-sm" id="prizePool" required min="0">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Type</label>
+                            <select class="form-select" id="tournamentType" required>
+                                <option value="solo">Solo</option>
+                                <option value="duo">Duo</option>
+                                <option value="squad">Squad</option>
+                            </select>
                         </div>
                     </div>
                     
                     <div class="row">
-                        <div class="col-6 mb-2">
-                            <label class="form-label small">Kill Reward (৳)</label>
-                            <input type="number" class="form-control form-control-sm" id="killReward" required min="0">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Entry Fee (৳)</label>
+                            <input type="number" class="form-control" id="entryFee" value="50" min="10" required>
                         </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label small">Max Teams/Players</label>
-                            <input type="number" class="form-control form-control-sm" id="maxPlayers" value="25" min="2">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Prize Pool (৳)</label>
+                            <input type="number" class="form-control" id="prizePool" value="500" min="100" required>
                         </div>
                     </div>
                     
-                    <div class="mb-2">
-                        <label class="form-label small">Start Date & Time</label>
-                        <input type="datetime-local" class="form-control form-control-sm" id="tournamentTime" required>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Kill Reward (৳)</label>
+                            <input type="number" class="form-control" id="killReward" value="10" min="0" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Max Players</label>
+                            <input type="number" class="form-control" id="maxPlayers" value="25" min="2" max="100">
+                        </div>
                     </div>
                     
-                    <div class="mb-2">
-                        <label class="form-label small">Status</label>
-                        <select class="form-select form-select-sm" id="tournamentStatus">
-                            <option value="upcoming">Upcoming</option>
-                            <option value="live">Live</option>
-                        </select>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Start Date & Time</label>
+                            <input type="datetime-local" class="form-control" id="tournamentTime" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="tournamentStatus">
+                                <option value="upcoming">Upcoming</option>
+                                <option value="live">Live (Start Now)</option>
+                            </select>
+                        </div>
                     </div>
                     
-                    <button class="btn btn-admin btn-sm w-100 mt-2" onclick="createTournament()">Create Tournament</button>
+                    <div class="mb-3">
+                        <label class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" id="tournamentDescription" rows="2" placeholder="Tournament description..."></textarea>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        Tournament will automatically go live 10 minutes before start time and complete after 2 hours.
+                    </div>
+                    
+                    <button class="btn btn-admin w-100" onclick="createTournament()">
+                        <i class="fas fa-plus"></i> Create Tournament
+                    </button>
                 </div>
             </div>
         </div>
@@ -648,31 +890,38 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header modal-header-admin">
-                    <h6 class="modal-title"><i class="fas fa-user-plus"></i> Add User</h6>
+                    <h6 class="modal-title"><i class="fas fa-user-plus"></i> Add New User</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-2">
-                        <label class="form-label small">Full Name</label>
-                        <input type="text" class="form-control form-control-sm" id="userName" required>
+                    <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="userName" placeholder="Enter full name" required>
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label small">Username</label>
-                        <input type="text" class="form-control form-control-sm" id="userUsername" required>
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" id="userUsername" placeholder="Choose username" required>
+                        <small class="text-muted">This will be used for login</small>
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label small">Password</label>
-                        <input type="password" class="form-control form-control-sm" id="userPassword" required>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" id="userPassword" placeholder="Create password" required>
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label small">Free Fire ID</label>
-                        <input type="text" class="form-control form-control-sm" id="userFFID" required>
+                    <div class="mb-3">
+                        <label class="form-label">Free Fire ID</label>
+                        <input type="text" class="form-control" id="userFFID" placeholder="Enter Free Fire ID" required>
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label small">Initial Balance (৳)</label>
-                        <input type="number" class="form-control form-control-sm" id="userBalance" value="0" min="0">
+                    <div class="mb-3">
+                        <label class="form-label">Initial Balance (৳)</label>
+                        <input type="number" class="form-control" id="userBalance" value="0" min="0">
                     </div>
-                    <button class="btn btn-admin btn-sm w-100" onclick="addUser()">Add User</button>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        User will be able to login immediately with this username and password.
+                    </div>
+                    <button class="btn btn-admin w-100" onclick="addUser()">
+                        <i class="fas fa-user-plus"></i> Add User
+                    </button>
                 </div>
             </div>
         </div>
@@ -687,1518 +936,96 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-2">
-                        <label class="form-label small">Notice Message</label>
-                        <textarea class="form-control form-control-sm" id="noticeMessage" rows="3" required></textarea>
+                    <div class="mb-3">
+                        <label class="form-label">Notice Title</label>
+                        <input type="text" class="form-control" id="noticeTitle" placeholder="Enter notice title">
                     </div>
-                    <div class="mb-2">
+                    <div class="mb-3">
+                        <label class="form-label">Message</label>
+                        <textarea class="form-control" id="noticeMessage" rows="3" placeholder="Enter notice message" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notice Type</label>
+                        <select class="form-select" id="noticeType">
+                            <option value="info">Information</option>
+                            <option value="warning">Warning</option>
+                            <option value="success">Success</option>
+                            <option value="maintenance">Maintenance</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="noticeActive" checked>
-                            <label class="form-check-label small">Active</label>
+                            <label class="form-check-label">Active (Show to users)</label>
                         </div>
                     </div>
-                    <button class="btn btn-admin btn-sm w-100" onclick="addNotice()">Add Notice</button>
+                    <button class="btn btn-admin w-100" onclick="addNotice()">
+                        <i class="fas fa-plus"></i> Add Notice
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Add Payment Method Modal -->
-    <div class="modal fade" id="addPaymentMethodModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header modal-header-admin">
-                    <h6 class="modal-title"><i class="fas fa-credit-card"></i> Add Payment Method</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-2">
-                        <label class="form-label small">Payment Method Name</label>
-                        <select class="form-select form-select-sm" id="paymentMethodName" required>
-                            <option value="Bkash">Bkash</option>
-                            <option value="Nagad">Nagad</option>
-                            <option value="Rocket">Rocket (DBBL)</option>
-                            <option value="Upay">Upay</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label small">Account Number</label>
-                        <input type="text" class="form-control form-control-sm" id="paymentNumber" required placeholder="e.g., 017XXXXXXXX">
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label small">Account Type</label>
-                        <input type="text" class="form-control form-control-sm" id="paymentType" value="Personal" placeholder="e.g., Personal, Merchant">
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label small">Status</label>
-                        <select class="form-select form-select-sm" id="paymentStatus">
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-admin btn-sm w-100" onclick="addPaymentMethod()">Add Payment Method</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Set Room Details Modal -->
-    <div class="modal fade" id="setRoomModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header modal-header-admin">
-                    <h6 class="modal-title"><i class="fas fa-door-open"></i> Set Room Details</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="roomTournamentId">
-                    <div class="mb-2">
-                        <label class="form-label small">Room ID</label>
-                        <input type="text" class="form-control form-control-sm" id="roomId" required placeholder="Enter room ID">
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label small">Room Password</label>
-                        <input type="text" class="form-control form-control-sm" id="roomPassword" required placeholder="Enter room password">
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label small">Tournament Name</label>
-                        <p class="mb-0" id="roomTournamentName"></p>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label small">Joined Players</label>
-                        <p class="mb-0" id="roomJoinedPlayers"></p>
-                    </div>
-                    <button class="btn btn-admin btn-sm w-100 mt-2" onclick="saveRoomDetails()">Save Room Details</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- View Tournament Players Modal -->
-    <div class="modal fade" id="viewPlayersModal" tabindex="-1">
+    <!-- Edit Tournament Modal -->
+    <div class="modal fade" id="editTournamentModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header modal-header-admin">
-                    <h6 class="modal-title"><i class="fas fa-users"></i> Tournament Players</h6>
+                    <h6 class="modal-title"><i class="fas fa-edit"></i> Edit Tournament</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <input type="hidden" id="playersTournamentId">
-                    <h6 id="playersTournamentName"></h6>
-                    <div id="tournamentPlayersList">
-                        <div class="loading-spinner"></div>
-                    </div>
+                <div class="modal-body" id="editTournamentBody">
+                    <div class="loading-spinner"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
+    <!-- View User Details Modal -->
+    <div class="modal fade" id="viewUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-admin">
+                    <h6 class="modal-title"><i class="fas fa-user"></i> User Details</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="viewUserBody">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="successToast" class="toast" role="alert">
+            <div class="toast-header bg-success text-white">
+                <strong class="me-auto"><i class="fas fa-check-circle"></i> Success</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="successToastBody"></div>
+        </div>
+        
+        <div id="errorToast" class="toast" role="alert">
+            <div class="toast-header bg-danger text-white">
+                <strong class="me-auto"><i class="fas fa-exclamation-circle"></i> Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="errorToastBody"></div>
+        </div>
+        
+        <div id="warningToast" class="toast" role="alert">
+            <div class="toast-header bg-warning text-dark">
+                <strong class="me-auto"><i class="fas fa-exclamation-triangle"></i> Warning</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="warningToastBody"></div>
+        </div>
+    </div>
+
+    <!-- Bootstrap & Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        // Admin State
-        let isAdminLoggedIn = false;
-        let allUsers = [];
-        let allTournaments = [];
-        let rechargeRequests = [];
-        let withdrawRequests = [];
-        let paymentMethods = [];
-        let notices = [];
-        let tournamentFilter = 'all';
-        let systemSettings = {};
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAdminLogin();
-        });
-        
-        // Check Admin Login
-        function checkAdminLogin() {
-            const savedLogin = localStorage.getItem('adminLoggedIn');
-            if (savedLogin === 'true') {
-                isAdminLoggedIn = true;
-                document.getElementById('loginSection').classList.add('d-none');
-                document.getElementById('dashboardSection').classList.remove('d-none');
-                loadAllData();
-            }
-        }
-        
-        // Admin Login
-        function adminLogin() {
-            const password = document.getElementById('adminPassword').value.trim();
-            
-            if (!password) {
-                alert('Please enter password');
-                return;
-            }
-            
-            // Check admin credentials
-            database.ref('admin').once('value')
-                .then((snapshot) => {
-                    if (snapshot.exists()) {
-                        const adminData = snapshot.val();
-                        
-                        // Check password
-                        if (password === '123456' || (adminData.password && password === adminData.password)) {
-                            isAdminLoggedIn = true;
-                            localStorage.setItem('adminLoggedIn', 'true');
-                            
-                            // Show admin panel
-                            document.getElementById('loginSection').classList.add('d-none');
-                            document.getElementById('dashboardSection').classList.remove('d-none');
-                            
-                            // Load data
-                            loadAllData();
-                            
-                            alert('Admin login successful!');
-                        } else {
-                            alert('Invalid password');
-                        }
-                    } else {
-                        // First time - create admin
-                        const defaultSettings = {
-                            defaultEntryFee: 100,
-                            killRewardPercent: 10,
-                            minWithdrawal: 200,
-                            paymentMethods: {
-                                Bkash: { number: '017XXXXXXXX', type: 'Personal', status: 'active' },
-                                Nagad: { number: '018XXXXXXXX', type: 'Personal', status: 'active' },
-                                Rocket: { number: '016XXXXXXXX', type: 'Personal', status: 'active' }
-                            }
-                        };
-                        
-                        database.ref('admin').set({
-                            password: '123456',
-                            createdAt: Date.now(),
-                            settings: defaultSettings
-                        })
-                        .then(() => {
-                            isAdminLoggedIn = true;
-                            localStorage.setItem('adminLoggedIn', 'true');
-                            
-                            document.getElementById('loginSection').classList.add('d-none');
-                            document.getElementById('dashboardSection').classList.remove('d-none');
-                            
-                            loadAllData();
-                            
-                            alert('Admin account created! Default password: 123456');
-                        });
-                    }
-                })
-                .catch((error) => {
-                    alert('Login failed: ' + error.message);
-                });
-        }
-        
-        // Load All Data
-        function loadAllData() {
-            loadUsers();
-            loadTournaments();
-            loadRechargeRequests();
-            loadWithdrawRequests();
-            loadPaymentMethods();
-            loadNotices();
-            loadSettings();
-            loadStats();
-            setupRealtimeListeners();
-        }
-        
-        // Load Settings
-        function loadSettings() {
-            database.ref('admin/settings').once('value')
-                .then((snapshot) => {
-                    if (snapshot.exists()) {
-                        systemSettings = snapshot.val();
-                    }
-                });
-        }
-        
-        // Setup Realtime Listeners
-        function setupRealtimeListeners() {
-            // Users listener
-            database.ref('users').on('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    allUsers = [];
-                    snapshot.forEach((child) => {
-                        const user = child.val();
-                        user.username = child.key;
-                        allUsers.push(user);
-                    });
-                    
-                    updateStats();
-                    if (document.getElementById('usersSection').classList.contains('d-none') === false) {
-                        displayUsers();
-                    }
-                }
-            });
-            
-            // Tournaments listener
-            database.ref('tournaments').on('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    allTournaments = [];
-                    snapshot.forEach((child) => {
-                        const tournament = child.val();
-                        tournament.id = child.key;
-                        allTournaments.push(tournament);
-                    });
-                    
-                    updateStats();
-                    if (document.getElementById('tournamentsSection').classList.contains('d-none') === false) {
-                        displayTournaments();
-                    }
-                    if (document.getElementById('dashboardSection').classList.contains('d-none') === false) {
-                        displayRecentTournaments();
-                    }
-                }
-            });
-            
-            // Recharge requests listener
-            database.ref('rechargeRequests').on('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    rechargeRequests = [];
-                    snapshot.forEach((child) => {
-                        const request = child.val();
-                        request.id = child.key;
-                        rechargeRequests.push(request);
-                    });
-                    
-                    updateStats();
-                    if (document.getElementById('rechargeSection').classList.contains('d-none') === false) {
-                        displayRechargeRequests();
-                    }
-                }
-            });
-            
-            // Withdrawal requests listener
-            database.ref('withdrawRequests').on('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    withdrawRequests = [];
-                    snapshot.forEach((child) => {
-                        const request = child.val();
-                        request.id = child.key;
-                        withdrawRequests.push(request);
-                    });
-                    
-                    updateStats();
-                    if (document.getElementById('withdrawSection').classList.contains('d-none') === false) {
-                        displayWithdrawRequests();
-                    }
-                }
-            });
-            
-            // Payment methods listener
-            database.ref('admin/settings/paymentMethods').on('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    paymentMethods = [];
-                    snapshot.forEach((child) => {
-                        const method = child.val();
-                        method.name = child.key;
-                        paymentMethods.push(method);
-                    });
-                    
-                    if (document.getElementById('paymentMethodsSection').classList.contains('d-none') === false) {
-                        displayPaymentMethods();
-                    }
-                }
-            });
-            
-            // Notices listener
-            database.ref('notices').on('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    notices = [];
-                    snapshot.forEach((child) => {
-                        const notice = child.val();
-                        notice.id = child.key;
-                        notices.push(notice);
-                    });
-                    
-                    if (document.getElementById('noticeSection').classList.contains('d-none') === false) {
-                        displayNotices();
-                    }
-                }
-            });
-        }
-        
-        // Load Users
-        function loadUsers() {
-            database.ref('users').once('value')
-                .then((snapshot) => {
-                    if (snapshot.exists()) {
-                        allUsers = [];
-                        snapshot.forEach((child) => {
-                            const user = child.val();
-                            user.username = child.key;
-                            allUsers.push(user);
-                        });
-                        
-                        updateStats();
-                    }
-                });
-        }
-        
-        // Display Users
-        function displayUsers() {
-            const container = document.getElementById('usersTable');
-            const searchTerm = document.getElementById('searchUsers')?.value.toLowerCase() || '';
-            
-            const filteredUsers = allUsers.filter(user => 
-                user.username.toLowerCase().includes(searchTerm) ||
-                (user.name && user.name.toLowerCase().includes(searchTerm)) ||
-                (user.ffid && user.ffid.toLowerCase().includes(searchTerm))
-            );
-            
-            if (!filteredUsers.length) {
-                container.innerHTML = '<p class="text-center small">No users found</p>';
-                return;
-            }
-            
-            let html = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>#</th><th>Username</th><th>Name</th><th>FF ID</th><th>Balance</th><th>Actions</th></tr></thead><tbody>';
-            
-            filteredUsers.forEach((user, index) => {
-                html += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td><strong>${user.username}</strong></td>
-                        <td>${user.name || 'N/A'}</td>
-                        <td>${user.ffid || 'N/A'}</td>
-                        <td class="text-success">৳ ${user.balance || 0}</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning" onclick="editUser('${user.username}')" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-success" onclick="addBalanceToUser('${user.username}')" title="Add Balance">
-                                <i class="fas fa-plus-circle"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            html += '</tbody></table></div>';
-            container.innerHTML = html;
-        }
-        
-        // Load Tournaments
-        function loadTournaments() {
-            database.ref('tournaments').once('value')
-                .then((snapshot) => {
-                    if (snapshot.exists()) {
-                        allTournaments = [];
-                        snapshot.forEach((child) => {
-                            const tournament = child.val();
-                            tournament.id = child.key;
-                            allTournaments.push(tournament);
-                        });
-                        
-                        updateStats();
-                    }
-                });
-        }
-        
-        // Display Tournaments
-        function displayTournaments() {
-            const container = document.getElementById('tournamentsTable');
-            
-            let filteredTournaments = allTournaments;
-            if (tournamentFilter !== 'all') {
-                filteredTournaments = allTournaments.filter(t => t.status === tournamentFilter);
-            }
-            
-            if (!filteredTournaments.length) {
-                container.innerHTML = `<p class="text-center small">No ${tournamentFilter} tournaments found</p>`;
-                return;
-            }
-            
-            let html = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Tournament</th><th>Type</th><th>Schedule</th><th>Status</th><th>Room</th><th>Players</th><th>Actions</th></tr></thead><tbody>';
-            
-            filteredTournaments.forEach(tournament => {
-                const isDuo = tournament.type === 'duo';
-                const entryFeeDisplay = isDuo ? `৳${tournament.entryFee} × 2` : `৳${tournament.entryFee}`;
-                const roomStatus = tournament.roomId ? 
-                    '<span class="badge bg-success">Set</span>' : 
-                    '<span class="badge bg-warning">Pending</span>';
-                
-                html += `
-                    <tr>
-                        <td>
-                            <strong>${tournament.title}</strong><br>
-                            <small class="text-muted">Entry: ${entryFeeDisplay}</small>
-                        </td>
-                        <td>
-                            <span class="tournament-type-badge type-${tournament.type}">${tournament.type}</span>
-                        </td>
-                        <td><small>${new Date(tournament.schedule).toLocaleString()}</small></td>
-                        <td>
-                            <span class="status-badge status-${tournament.status}">
-                                ${tournament.status}
-                            </span>
-                        </td>
-                        <td>${roomStatus}</td>
-                        <td>${tournament.joinedPlayers || 0}/${tournament.maxPlayers || 0}</td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                ${tournament.status === 'upcoming' ? `
-                                    <button class="btn btn-success" onclick="updateTournamentStatus('${tournament.id}', 'live')" title="Start">
-                                        <i class="fas fa-play"></i>
-                                    </button>
-                                ` : ''}
-                                
-                                ${tournament.status === 'live' ? `
-                                    ${!tournament.roomId ? `
-                                        <button class="btn btn-info" onclick="openSetRoomModal('${tournament.id}')" title="Set Room">
-                                            <i class="fas fa-door-open"></i>
-                                        </button>
-                                    ` : ''}
-                                    <button class="btn btn-warning" onclick="updateTournamentStatus('${tournament.id}', 'completed')" title="Complete">
-                                        <i class="fas fa-flag-checkered"></i>
-                                    </button>
-                                ` : ''}
-                                
-                                <button class="btn btn-primary" onclick="viewTournamentPlayers('${tournament.id}')" title="View Players">
-                                    <i class="fas fa-users"></i>
-                                </button>
-                                
-                                <button class="btn btn-secondary" onclick="editTournamentDetails('${tournament.id}')" title="Edit">
-                                    <i class="fas fa-cog"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            html += '</tbody></table></div>';
-            container.innerHTML = html;
-        }
-        
-        // Open Set Room Modal
-        function openSetRoomModal(tournamentId) {
-            const tournament = allTournaments.find(t => t.id === tournamentId);
-            if (!tournament || tournament.status !== 'live') {
-                alert('Room can only be set for LIVE tournaments');
-                return;
-            }
-            
-            document.getElementById('roomTournamentId').value = tournamentId;
-            document.getElementById('roomTournamentName').textContent = tournament.title;
-            document.getElementById('roomJoinedPlayers').textContent = `${tournament.joinedPlayers || 0} players`;
-            document.getElementById('roomId').value = tournament.roomId || '';
-            document.getElementById('roomPassword').value = tournament.password || '';
-            
-            const modal = new bootstrap.Modal(document.getElementById('setRoomModal'));
-            modal.show();
-        }
-        
-        // Save Room Details
-        function saveRoomDetails() {
-            const tournamentId = document.getElementById('roomTournamentId').value;
-            const roomId = document.getElementById('roomId').value.trim();
-            const password = document.getElementById('roomPassword').value.trim();
-            
-            if (!roomId || !password) {
-                alert('Please enter both Room ID and Password');
-                return;
-            }
-            
-            const updates = {
-                roomId: roomId,
-                password: password,
-                roomSetAt: Date.now()
-            };
-            
-            database.ref(`tournaments/${tournamentId}`).update(updates)
-                .then(() => {
-                    // Notify all joined players
-                    notifyPlayersAboutRoom(tournamentId, roomId, password);
-                    
-                    // Close modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('setRoomModal'));
-                    if (modal) modal.hide();
-                    
-                    alert('Room details saved and notified to players!');
-                })
-                .catch((error) => {
-                    alert('Failed to save room details: ' + error.message);
-                });
-        }
-        
-        // Notify Players About Room
-        function notifyPlayersAboutRoom(tournamentId, roomId, password) {
-            const tournament = allTournaments.find(t => t.id === tournamentId);
-            if (!tournament) return;
-            
-            // Get all players joined in this tournament
-            database.ref(`tournaments/${tournamentId}/players`).once('value')
-                .then((snapshot) => {
-                    if (snapshot.exists()) {
-                        const players = [];
-                        snapshot.forEach((child) => {
-                            players.push(child.key);
-                        });
-                        
-                        // Create notification for each player
-                        const notificationTime = Date.now();
-                        players.forEach(username => {
-                            const notificationData = {
-                                type: 'room_details',
-                                tournamentId: tournamentId,
-                                tournamentTitle: tournament.title,
-                                roomId: roomId,
-                                password: password,
-                                message: `Room details for ${tournament.title}: Room ID: ${roomId}, Password: ${password}`,
-                                timestamp: notificationTime,
-                                read: false
-                            };
-                            
-                            database.ref(`users/${username}/notifications/${notificationTime}`).set(notificationData);
-                        });
-                        
-                        console.log(`Room details sent to ${players.length} players`);
-                    }
-                });
-        }
-        
-        // View Tournament Players
-        function viewTournamentPlayers(tournamentId) {
-            const tournament = allTournaments.find(t => t.id === tournamentId);
-            if (!tournament) return;
-            
-            document.getElementById('playersTournamentId').value = tournamentId;
-            document.getElementById('playersTournamentName').textContent = tournament.title;
-            
-            database.ref(`tournaments/${tournamentId}/players`).once('value')
-                .then((snapshot) => {
-                    const container = document.getElementById('tournamentPlayersList');
-                    
-                    if (!snapshot.exists()) {
-                        container.innerHTML = '<p class="text-center">No players joined yet</p>';
-                    } else {
-                        let html = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>#</th><th>Username</th><th>Player Type</th><th>Entry Paid</th><th>Status</th></tr></thead><tbody>';
-                        
-                        let index = 1;
-                        snapshot.forEach((child) => {
-                            const player = child.val();
-                            const isDuo = player.type === 'duo';
-                            const entryPaid = isDuo ? `৳${tournament.entryFee * 2}` : `৳${tournament.entryFee}`;
-                            
-                            html += `
-                                <tr>
-                                    <td>${index++}</td>
-                                    <td><strong>${child.key}</strong></td>
-                                    <td>
-                                        <span class="badge ${isDuo ? 'bg-purple' : 'bg-blue'}">
-                                            ${isDuo ? 'Duo Team' : 'Solo'}
-                                        </span>
-                                    </td>
-                                    <td class="text-success">${entryPaid}</td>
-                                    <td><span class="status-badge status-joined">Joined</span></td>
-                                </tr>
-                            `;
-                        });
-                        
-                        html += '</tbody></table></div>';
-                        container.innerHTML = html;
-                    }
-                    
-                    const modal = new bootstrap.Modal(document.getElementById('viewPlayersModal'));
-                    modal.show();
-                });
-        }
-        
-        // Display Recent Tournaments
-        function displayRecentTournaments() {
-            const container = document.getElementById('recentTournaments');
-            const recent = allTournaments.slice(0, 5);
-            
-            if (!recent.length) {
-                container.innerHTML = '<p class="text-center small">No tournaments found</p>';
-                return;
-            }
-            
-            let html = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Tournament</th><th>Status</th><th>Players</th><th>Room</th></tr></thead><tbody>';
-            
-            recent.forEach(tournament => {
-                const roomStatus = tournament.roomId ? '✅' : '❌';
-                
-                html += `
-                    <tr>
-                        <td>
-                            <strong>${tournament.title}</strong><br>
-                            <small class="text-muted">${new Date(tournament.schedule).toLocaleDateString()}</small>
-                        </td>
-                        <td><span class="status-badge status-${tournament.status}">${tournament.status}</span></td>
-                        <td>${tournament.joinedPlayers || 0}/${tournament.maxPlayers || 0}</td>
-                        <td>${roomStatus}</td>
-                    </tr>
-                `;
-            });
-            
-            html += '</tbody></table></div>';
-            container.innerHTML = html;
-        }
-        
-        // Load Recharge Requests
-        function loadRechargeRequests() {
-            database.ref('rechargeRequests').once('value')
-                .then((snapshot) => {
-                    if (snapshot.exists()) {
-                        rechargeRequests = [];
-                        snapshot.forEach((child) => {
-                            const request = child.val();
-                            request.id = child.key;
-                            rechargeRequests.push(request);
-                        });
-                        
-                        updateStats();
-                    }
-                });
-        }
-        
-        // Display Recharge Requests
-        function displayRechargeRequests() {
-            const container = document.getElementById('rechargeRequestsTable');
-            const pendingRequests = rechargeRequests.filter(r => r.status === 'pending');
-            
-            if (!rechargeRequests.length) {
-                container.innerHTML = '<p class="text-center small">No recharge requests found</p>';
-                return;
-            }
-            
-            let html = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>User</th><th>Amount</th><th>Method</th><th>Time</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
-            
-            rechargeRequests.sort((a, b) => b.timestamp - a.timestamp).forEach(request => {
-                const time = new Date(request.timestamp).toLocaleString();
-                const methodClass = request.method ? request.method.toLowerCase() : 'other';
-                
-                html += `
-                    <tr>
-                        <td>
-                            <strong>${request.username}</strong><br>
-                            <small>From: ${request.senderNumber}</small><br>
-                            <small>TrxID: ${request.transactionId || 'N/A'}</small>
-                        </td>
-                        <td class="text-success">৳ ${request.amount}</td>
-                        <td>
-                            <span class="payment-method-badge ${methodClass}">${request.method}</span>
-                        </td>
-                        <td><small>${time}</small></td>
-                        <td>
-                            <span class="status-badge status-${request.status}">
-                                ${request.status}
-                            </span>
-                        </td>
-                        <td>
-                            ${request.status === 'pending' ? `
-                                <button class="btn btn-sm btn-success" onclick="approveRecharge('${request.id}')" title="Approve">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger" onclick="rejectRecharge('${request.id}')" title="Reject">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            ` : '<span class="text-muted small">Completed</span>'}
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            html += '</tbody></table></div>';
-            container.innerHTML = html;
-            
-            // Update notification badge
-            document.getElementById('rechargeNotification').textContent = pendingRequests.length;
-        }
-        
-        // Load Withdrawal Requests
-        function loadWithdrawRequests() {
-            database.ref('withdrawRequests').once('value')
-                .then((snapshot) => {
-                    if (snapshot.exists()) {
-                        withdrawRequests = [];
-                        snapshot.forEach((child) => {
-                            const request = child.val();
-                            request.id = child.key;
-                            withdrawRequests.push(request);
-                        });
-                        
-                        updateStats();
-                    }
-                });
-        }
-        
-        // Display Withdrawal Requests
-        function displayWithdrawRequests() {
-            const container = document.getElementById('withdrawRequestsTable');
-            const pendingRequests = withdrawRequests.filter(r => r.status === 'pending');
-            
-            if (!withdrawRequests.length) {
-                container.innerHTML = '<p class="text-center small">No withdrawal requests found</p>';
-                return;
-            }
-            
-            let html = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>User</th><th>Amount</th><th>Method</th><th>Time</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
-            
-            withdrawRequests.sort((a, b) => b.timestamp - a.timestamp).forEach(request => {
-                const time = new Date(request.timestamp).toLocaleString();
-                const methodClass = request.method ? request.method.toLowerCase() : 'other';
-                
-                html += `
-                    <tr>
-                        <td>
-                            <strong>${request.username}</strong><br>
-                            <small>To: ${request.accountNumber}</small>
-                        </td>
-                        <td class="text-danger">৳ ${request.amount}</td>
-                        <td>
-                            <span class="payment-method-badge ${methodClass}">${request.method}</span>
-                        </td>
-                        <td><small>${time}</small></td>
-                        <td>
-                            <span class="status-badge status-${request.status}">
-                                ${request.status}
-                            </span>
-                        </td>
-                        <td>
-                            ${request.status === 'pending' ? `
-                                <button class="btn btn-sm btn-success" onclick="approveWithdrawal('${request.id}')" title="Approve">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger" onclick="rejectWithdrawal('${request.id}')" title="Reject">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            ` : ''}
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            html += '</tbody></table></div>';
-            container.innerHTML = html;
-            
-            // Update notification badge
-            document.getElementById('withdrawNotification').textContent = pendingRequests.length;
-        }
-        
-        // Load Payment Methods
-        function loadPaymentMethods() {
-            database.ref('admin/settings/paymentMethods').once('value')
-                .then((snapshot) => {
-                    if (snapshot.exists()) {
-                        paymentMethods = [];
-                        snapshot.forEach((child) => {
-                            const method = child.val();
-                            method.name = child.key;
-                            paymentMethods.push(method);
-                        });
-                    }
-                });
-        }
-        
-        // Display Payment Methods
-        function displayPaymentMethods() {
-            const container = document.getElementById('paymentMethodsTable');
-            
-            if (!paymentMethods.length) {
-                container.innerHTML = '<p class="text-center small">No payment methods found</p>';
-                return;
-            }
-            
-            let html = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Method</th><th>Number</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
-            
-            paymentMethods.forEach((method, index) => {
-                const methodClass = method.name ? method.name.toLowerCase() : 'other';
-                
-                html += `
-                    <tr>
-                        <td>
-                            <span class="payment-method-badge ${methodClass}">${method.name}</span>
-                        </td>
-                        <td><strong>${method.number}</strong></td>
-                        <td>${method.type || 'Personal'}</td>
-                        <td>
-                            <span class="status-badge ${method.status === 'active' ? 'status-approved' : 'status-pending'}">
-                                ${method.status}
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-warning" onclick="editPaymentMethod('${method.name}')" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="deletePaymentMethod('${method.name}')" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            html += '</tbody></table></div>';
-            container.innerHTML = html;
-        }
-        
-        // Load Notices
-        function loadNotices() {
-            database.ref('notices').once('value')
-                .then((snapshot) => {
-                    if (snapshot.exists()) {
-                        notices = [];
-                        snapshot.forEach((child) => {
-                            const notice = child.val();
-                            notice.id = child.key;
-                            notices.push(notice);
-                        });
-                    }
-                });
-        }
-        
-        // Display Notices
-        function displayNotices() {
-            const container = document.getElementById('noticesTable');
-            
-            if (!notices.length) {
-                container.innerHTML = '<p class="text-center small">No notices found</p>';
-                return;
-            }
-            
-            let html = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Message</th><th>Created</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
-            
-            notices.sort((a, b) => b.timestamp - a.timestamp).forEach(notice => {
-                const time = new Date(notice.timestamp).toLocaleString();
-                
-                html += `
-                    <tr>
-                        <td>${notice.message}</td>
-                        <td><small>${time}</small></td>
-                        <td>
-                            <span class="status-badge ${notice.active ? 'status-approved' : 'status-pending'}">
-                                ${notice.active ? 'Active' : 'Inactive'}
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-warning" onclick="toggleNotice('${notice.id}', ${!notice.active})" title="${notice.active ? 'Deactivate' : 'Activate'}">
-                                <i class="fas fa-power-off"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteNotice('${notice.id}')" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            html += '</tbody></table></div>';
-            container.innerHTML = html;
-        }
-        
-        // Update Stats
-        function updateStats() {
-            // Total users
-            document.getElementById('totalUsers').textContent = allUsers.length;
-            document.getElementById('sysTotalUsers').textContent = allUsers.length;
-            
-            // Total tournaments
-            document.getElementById('totalTournaments').textContent = allTournaments.length;
-            document.getElementById('sysTotalTournaments').textContent = allTournaments.length;
-            
-            // Calculate revenue
-            let totalRevenue = 0;
-            allTournaments.forEach(t => {
-                if (t.joinedPlayers) {
-                    totalRevenue += (t.entryFee || 0) * (t.joinedPlayers || 0);
-                }
-            });
-            document.getElementById('totalRevenue').textContent = '৳ ' + totalRevenue;
-            
-            // Pending requests (recharge + withdrawal)
-            const pendingRecharge = rechargeRequests.filter(r => r.status === 'pending').length;
-            const pendingWithdraw = withdrawRequests.filter(r => r.status === 'pending').length;
-            const totalPending = pendingRecharge + pendingWithdraw;
-            
-            document.getElementById('pendingRequests').textContent = totalPending;
-            document.getElementById('sysPendingRequests').textContent = totalPending;
-            document.getElementById('notificationCount').textContent = totalPending;
-        }
-        
-        // Show Section
-        function showSection(sectionName) {
-            if (!isAdminLoggedIn) return;
-            
-            // Hide all sections
-            document.querySelectorAll('#mainContent > section').forEach(section => {
-                section.classList.add('d-none');
-            });
-            
-            // Update sidebar active
-            document.querySelectorAll('.sidebar-menu a').forEach(link => {
-                link.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-            
-            // Show selected section
-            const section = document.getElementById(sectionName + 'Section');
-            if (section) {
-                section.classList.remove('d-none');
-                
-                // Load section data
-                switch(sectionName) {
-                    case 'users':
-                        displayUsers();
-                        break;
-                    case 'tournaments':
-                        displayTournaments();
-                        break;
-                    case 'recharge':
-                        displayRechargeRequests();
-                        break;
-                    case 'withdraw':
-                        displayWithdrawRequests();
-                        break;
-                    case 'paymentMethods':
-                        displayPaymentMethods();
-                        break;
-                    case 'notice':
-                        displayNotices();
-                        break;
-                    case 'results':
-                        loadResults();
-                        break;
-                    case 'dashboard':
-                        displayRecentTournaments();
-                        break;
-                }
-            }
-        }
-        
-        // Create Tournament
-        function createTournament() {
-            const name = document.getElementById('tournamentName').value.trim();
-            const type = document.getElementById('tournamentType').value;
-            const entryFee = parseInt(document.getElementById('entryFee').value);
-            const prize = parseInt(document.getElementById('prizePool').value);
-            const killReward = parseInt(document.getElementById('killReward').value);
-            const maxPlayers = parseInt(document.getElementById('maxPlayers').value);
-            const schedule = document.getElementById('tournamentTime').value;
-            const status = document.getElementById('tournamentStatus').value;
-            
-            if (!name || !schedule) {
-                alert('Please fill all required fields');
-                return;
-            }
-            
-            const tournamentData = {
-                title: name,
-                type: type,
-                entryFee: entryFee,
-                prize: prize,
-                killReward: killReward,
-                maxPlayers: maxPlayers,
-                schedule: schedule,
-                status: status,
-                joinedPlayers: 0,
-                createdAt: Date.now()
-            };
-            
-            const tournamentId = 'tournament_' + Date.now();
-            
-            database.ref(`tournaments/${tournamentId}`).set(tournamentData)
-                .then(() => {
-                    // Close modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('createTournamentModal'));
-                    if (modal) modal.hide();
-                    
-                    // Reset form
-                    document.getElementById('tournamentName').value = '';
-                    document.getElementById('entryFee').value = '';
-                    document.getElementById('prizePool').value = '';
-                    document.getElementById('killReward').value = '';
-                    
-                    alert('Tournament created successfully!');
-                })
-                .catch((error) => {
-                    alert('Failed to create tournament: ' + error.message);
-                });
-        }
-        
-        // Update Tournament Status
-        function updateTournamentStatus(tournamentId, newStatus) {
-            const updates = {
-                status: newStatus,
-                updatedAt: Date.now()
-            };
-            
-            if (newStatus === 'completed') {
-                updates.completedAt = Date.now();
-            }
-            
-            database.ref(`tournaments/${tournamentId}`).update(updates)
-                .then(() => {
-                    alert(`Tournament status updated to ${newStatus}`);
-                });
-        }
-        
-        // Add User
-        function addUser() {
-            const name = document.getElementById('userName').value.trim();
-            const username = document.getElementById('userUsername').value.trim();
-            const password = document.getElementById('userPassword').value.trim();
-            const ffid = document.getElementById('userFFID').value.trim();
-            const balance = parseInt(document.getElementById('userBalance').value);
-            
-            if (!name || !username || !password || !ffid) {
-                alert('Please fill all fields');
-                return;
-            }
-            
-            // Check if user exists
-            database.ref(`users/${username}`).once('value')
-                .then((snapshot) => {
-                    if (snapshot.exists()) {
-                        alert('Username already exists');
-                    } else {
-                        const userData = {
-                            name: name,
-                            password: password,
-                            ffid: ffid,
-                            balance: balance,
-                            kills: 0,
-                            wins: 0,
-                            matches: 0,
-                            joinDate: new Date().toISOString(),
-                            transactions: {}
-                        };
-                        
-                        database.ref(`users/${username}`).set(userData)
-                            .then(() => {
-                                // Close modal
-                                const modal = bootstrap.Modal.getInstance(document.getElementById('addUserModal'));
-                                if (modal) modal.hide();
-                                
-                                // Reset form
-                                document.getElementById('userName').value = '';
-                                document.getElementById('userUsername').value = '';
-                                document.getElementById('userPassword').value = '';
-                                document.getElementById('userFFID').value = '';
-                                document.getElementById('userBalance').value = '0';
-                                
-                                alert('User added successfully!');
-                            });
-                    }
-                });
-        }
-        
-        // Add Notice
-        function addNotice() {
-            const message = document.getElementById('noticeMessage').value.trim();
-            const active = document.getElementById('noticeActive').checked;
-            
-            if (!message) {
-                alert('Please enter notice message');
-                return;
-            }
-            
-            const noticeData = {
-                message: message,
-                active: active,
-                timestamp: Date.now()
-            };
-            
-            const noticeId = 'notice_' + Date.now();
-            
-            database.ref(`notices/${noticeId}`).set(noticeData)
-                .then(() => {
-                    // Close modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addNoticeModal'));
-                    if (modal) modal.hide();
-                    
-                    // Reset form
-                    document.getElementById('noticeMessage').value = '';
-                    
-                    alert('Notice added successfully!');
-                });
-        }
-        
-        // Add Payment Method
-        function addPaymentMethod() {
-            const name = document.getElementById('paymentMethodName').value.trim();
-            const number = document.getElementById('paymentNumber').value.trim();
-            const type = document.getElementById('paymentType').value.trim();
-            const status = document.getElementById('paymentStatus').value;
-            
-            if (!name || !number) {
-                alert('Please fill all required fields');
-                return;
-            }
-            
-            const methodData = {
-                number: number,
-                type: type || 'Personal',
-                status: status,
-                updatedAt: Date.now()
-            };
-            
-            database.ref(`admin/settings/paymentMethods/${name}`).set(methodData)
-                .then(() => {
-                    // Close modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addPaymentMethodModal'));
-                    if (modal) modal.hide();
-                    
-                    // Reset form
-                    document.getElementById('paymentNumber').value = '';
-                    document.getElementById('paymentType').value = 'Personal';
-                    
-                    alert('Payment method added successfully!');
-                });
-        }
-        
-        // Approve Recharge
-        function approveRecharge(requestId) {
-            const request = rechargeRequests.find(r => r.id === requestId);
-            if (!request) return;
-            
-            // Update request status
-            database.ref(`rechargeRequests/${requestId}`).update({
-                status: 'approved',
-                approvedAt: Date.now(),
-                approvedBy: 'admin'
-            })
-            .then(() => {
-                // Update user balance
-                database.ref(`users/${request.username}`).once('value')
-                    .then((snapshot) => {
-                        if (snapshot.exists()) {
-                            const user = snapshot.val();
-                            const newBalance = (user.balance || 0) + parseInt(request.amount);
-                            
-                            database.ref(`users/${request.username}`).update({
-                                balance: newBalance
-                            });
-                            
-                            // Update user transaction
-                            database.ref(`users/${request.username}/transactions/${requestId}`).set({
-                                type: 'recharge',
-                                amount: parseInt(request.amount),
-                                status: 'approved',
-                                timestamp: Date.now(),
-                                method: request.method
-                            });
-                            
-                            alert('Recharge approved! Balance added to user.');
-                        }
-                    });
-            });
-        }
-        
-        // Reject Recharge
-        function rejectRecharge(requestId) {
-            database.ref(`rechargeRequests/${requestId}`).update({
-                status: 'rejected',
-                rejectedAt: Date.now(),
-                rejectedBy: 'admin'
-            })
-            .then(() => {
-                alert('Recharge request rejected!');
-            });
-        }
-        
-        // Approve Withdrawal
-        function approveWithdrawal(requestId) {
-            const request = withdrawRequests.find(r => r.id === requestId);
-            if (!request) return;
-            
-            const trxId = prompt('Enter the Transaction ID of your payment to the user:');
-            if (!trxId) {
-                alert('Transaction ID is required!');
-                return;
-            }
-            
-            const updates = {
-                status: 'approved',
-                approvedAt: Date.now(),
-                approvedBy: 'admin',
-                adminTrxId: trxId
-            };
-            
-            database.ref(`withdrawRequests/${requestId}`).update(updates)
-                .then(() => {
-                    // Add transaction record
-                    database.ref(`users/${request.username}/transactions/${requestId}`).set({
-                        type: 'withdrawal',
-                        amount: -parseInt(request.amount),
-                        status: 'approved',
-                        timestamp: Date.now(),
-                        method: request.method,
-                        adminTrxId: trxId
-                    });
-                    
-                    alert('Withdrawal approved and payment recorded!');
-                });
-        }
-        
-        // Reject Withdrawal
-        function rejectWithdrawal(requestId) {
-            const request = withdrawRequests.find(r => r.id === requestId);
-            if (!request) return;
-            
-            const reason = prompt('Enter reason for rejection:', '');
-            
-            const updates = {
-                status: 'rejected',
-                rejectedAt: Date.now(),
-                rejectedBy: 'admin',
-                rejectReason: reason
-            };
-            
-            database.ref(`withdrawRequests/${requestId}`).update(updates)
-                .then(() => {
-                    // Update user transaction record
-                    database.ref(`users/${request.username}/transactions/${requestId}`).set({
-                        type: 'withdrawal',
-                        amount: -parseInt(request.amount),
-                        status: 'rejected',
-                        timestamp: Date.now(),
-                        rejectReason: reason
-                    });
-                    
-                    alert('Withdrawal request rejected!');
-                });
-        }
-        
-        // Edit User
-        function editUser(username) {
-            const user = allUsers.find(u => u.username === username);
-            if (user) {
-                const newBalance = prompt(`Enter new balance for ${username}:`, user.balance);
-                if (newBalance !== null && !isNaN(newBalance)) {
-                    database.ref(`users/${username}`).update({
-                        balance: parseInt(newBalance)
-                    })
-                    .then(() => {
-                        alert('User balance updated!');
-                    });
-                }
-            }
-        }
-        
-        // Add Balance to User
-        function addBalanceToUser(username) {
-            const amount = prompt(`Enter amount to add to ${username}:`, '0');
-            if (amount !== null && !isNaN(amount) && amount > 0) {
-                const user = allUsers.find(u => u.username === username);
-                if (user) {
-                    const newBalance = (user.balance || 0) + parseInt(amount);
-                    
-                    database.ref(`users/${username}`).update({
-                        balance: newBalance
-                    })
-                    .then(() => {
-                        // Add transaction
-                        database.ref(`users/${username}/transactions/${Date.now()}`).set({
-                            type: 'admin_added',
-                            amount: parseInt(amount),
-                            timestamp: Date.now(),
-                            admin: 'admin'
-                        });
-                        
-                        alert('Balance added to user!');
-                    });
-                }
-            }
-        }
-        
-        // Edit Tournament Details
-        function editTournamentDetails(tournamentId) {
-            const tournament = allTournaments.find(t => t.id === tournamentId);
-            if (tournament) {
-                const newPrize = prompt('Enter new prize amount:', tournament.prize);
-                if (newPrize !== null && !isNaN(newPrize)) {
-                    database.ref(`tournaments/${tournamentId}`).update({
-                        prize: parseInt(newPrize)
-                    })
-                    .then(() => {
-                        alert('Tournament prize updated!');
-                    });
-                }
-            }
-        }
-        
-        // Edit Payment Method
-        function editPaymentMethod(methodName) {
-            const method = paymentMethods.find(m => m.name === methodName);
-            if (!method) return;
-            
-            const newNumber = prompt(`Enter new number for ${methodName}:`, method.number);
-            if (newNumber !== null && newNumber.trim() !== '') {
-                const newStatus = confirm(`Is ${methodName} currently active?`) ? 'active' : 'inactive';
-                
-                database.ref(`admin/settings/paymentMethods/${methodName}`).update({
-                    number: newNumber.trim(),
-                    status: newStatus,
-                    updatedAt: Date.now()
-                })
-                .then(() => {
-                    alert('Payment method updated!');
-                });
-            }
-        }
-        
-        // Delete Payment Method
-        function deletePaymentMethod(methodName) {
-            if (confirm(`Are you sure you want to delete ${methodName} payment method?`)) {
-                database.ref(`admin/settings/paymentMethods/${methodName}`).remove()
-                    .then(() => {
-                        alert('Payment method deleted!');
-                    });
-            }
-        }
-        
-        // Toggle Notice
-        function toggleNotice(noticeId, newState) {
-            database.ref(`notices/${noticeId}`).update({
-                active: newState
-            })
-            .then(() => {
-                alert(`Notice ${newState ? 'activated' : 'deactivated'}!`);
-            });
-        }
-        
-        // Delete Notice
-        function deleteNotice(noticeId) {
-            if (confirm('Are you sure you want to delete this notice?')) {
-                database.ref(`notices/${noticeId}`).remove()
-                    .then(() => {
-                        alert('Notice deleted!');
-                    });
-            }
-        }
-        
-        // View Results
-        function viewResults(tournamentId) {
-            const tournament = allTournaments.find(t => t.id === tournamentId);
-            if (tournament) {
-                alert(`Viewing results for: ${tournament.title}\n\nThis feature will show detailed results including:\n- Winner rankings\n- Kill counts\n- Prize distribution`);
-            }
-        }
-        
-        // Load Results
-        function loadResults() {
-            const container = document.getElementById('resultsTable');
-            const completed = allTournaments.filter(t => t.status === 'completed');
-            
-            if (!completed.length) {
-                container.innerHTML = '<p class="text-center small">No completed tournaments found</p>';
-                return;
-            }
-            
-            let html = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Tournament</th><th>Completed</th><th>Players</th><th>Actions</th></tr></thead><tbody>';
-            
-            completed.forEach(tournament => {
-                html += `
-                    <tr>
-                        <td>
-                            <strong>${tournament.title}</strong><br>
-                            <small class="text-muted">Prize: ৳${tournament.prize}</small>
-                        </td>
-                        <td><small>${new Date(tournament.completedAt || Date.now()).toLocaleDateString()}</small></td>
-                        <td>${tournament.joinedPlayers || 0} players</td>
-                        <td>
-                            <button class="btn btn-sm btn-info" onclick="viewResults('${tournament.id}')">
-                                View Results
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            html += '</tbody></table></div>';
-            container.innerHTML = html;
-        }
-        
-        // Save Settings
-        function saveSettings() {
-            const newPassword = document.getElementById('newAdminPassword').value.trim();
-            const defaultEntryFee = document.getElementById('defaultEntryFee').value;
-            const killRewardPercent = document.getElementById('killRewardPercent').value;
-            const minWithdrawal = document.getElementById('minWithdrawal').value;
-            
-            database.ref('admin').once('value')
-                .then((snapshot) => {
-                    const adminData = snapshot.val() || {};
-                    
-                    if (newPassword) {
-                        adminData.password = newPassword;
-                    }
-                    
-                    adminData.settings = {
-                        defaultEntryFee: defaultEntryFee,
-                        killRewardPercent: killRewardPercent,
-                        minWithdrawal: minWithdrawal
-                    };
-                    
-                    // Keep existing payment methods
-                    if (adminData.settings.paymentMethods) {
-                        adminData.settings.paymentMethods = adminData.settings.paymentMethods;
-                    }
-                    
-                    database.ref('admin').set(adminData)
-                        .then(() => {
-                            document.getElementById('newAdminPassword').value = '';
-                            alert('Settings saved successfully!');
-                        });
-                });
-        }
-        
-        // Admin Logout
-        function adminLogout() {
-            isAdminLoggedIn = false;
-            localStorage.removeItem('adminLoggedIn');
-            
-            document.getElementById('loginSection').classList.remove('d-none');
-            document.getElementById('dashboardSection').classList.add('d-none');
-            
-            document.getElementById('adminPassword').value = '';
-            
-            alert('Admin logged out');
-        }
-        
-        // Helper Functions
-        function filterTournaments(filter) {
-            tournamentFilter = filter;
-            displayTournaments();
-            
-            // Update button states
-            document.querySelectorAll('.btn-group-sm .btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-        }
-        
-        // Make functions available globally
-        window.showSection = showSection;
-        window.adminLogin = adminLogin;
-        window.adminLogout = adminLogout;
-        window.createTournament = createTournament;
-        window.addUser = addUser;
-        window.addNotice = addNotice;
-        window.addPaymentMethod = addPaymentMethod;
-        window.approveRecharge = approveRecharge;
-        window.rejectRecharge = rejectRecharge;
-        window.approveWithdrawal = approveWithdrawal;
-        window.rejectWithdrawal = rejectWithdrawal;
-        window.editUser = editUser;
-        window.addBalanceToUser = addBalanceToUser;
-        window.editTournamentDetails = editTournamentDetails;
-        window.editPaymentMethod = editPaymentMethod;
-        window.deletePaymentMethod = deletePaymentMethod;
-        window.toggleNotice = toggleNotice;
-        window.deleteNotice = deleteNotice;
-        window.viewResults = viewResults;
-        window.saveSettings = saveSettings;
-        window.filterTournaments = filterTournaments;
-        window.updateTournamentStatus = updateTournamentStatus;
-        window.openSetRoomModal = openSetRoomModal;
-        window.saveRoomDetails = saveRoomDetails;
-        window.viewTournamentPlayers = viewTournamentPlayers;
-    </script>
+    <script src="admin-script.js"></script>
 </body>
 </html>
