@@ -1489,7 +1489,7 @@
             modal.show();
         }
         
-        // View Room Details
+        // View Room Details (Only for joined players)
         function viewRoomDetails(tournamentId) {
             if (!isLoggedIn) {
                 showError('Please login first');
@@ -1499,11 +1499,20 @@
             const tournament = tournaments.find(t => t.id === tournamentId);
             if (!tournament) return;
             
-            // Check if tournament is live and room details are available
-            if (tournament.status === 'live' && tournament.roomId) {
-                const modalBody = document.getElementById('roomDetails');
-                modalBody.innerHTML = `
-                    <h6>${tournament.title}</h6>
+            // Check if user has joined this tournament
+            database.ref(`tournaments/${tournamentId}/players/${currentUser.username}`).once('value')
+                .then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        showError('You must join the tournament first to view room details');
+                        return;
+                    }
+                    
+                    // Show room details
+                    const modalBody = document.getElementById('roomDetails');
+                    
+                    if (!tournament.roomId || !tournament.password) {
+                        modalBody.innerHTML = `
+                           <h6>${tournament.title}</h6>
                     <div class="room-details-box">
                         <h5><i class="fas fa-door-open"></i> Room Details</h5>
                         <div class="room-id">${tournament.roomId}</div>
@@ -1874,7 +1883,11 @@
             const toast = new bootstrap.Toast(document.getElementById('errorToast'));
             toast.show();
         }
-        
+
+        function loadNotices() {
+            // Already handled in setupFirebaseListeners
+        }
+
         function filterTournaments() {
             const filter = document.getElementById('tournamentFilter').value;
             const container = document.getElementById('allTournamentsContainer');
