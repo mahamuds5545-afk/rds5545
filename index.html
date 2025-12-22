@@ -335,29 +335,65 @@
         </marquee>
     </div>
 <div><style>
-  .orange-button {
-    background-color: #FF8C00; /* Dark Orange */
+  .rainbow-glitter-button {
+    /* Initial color */
+    background-color: #FF8C00; 
     color: white;
-    padding: 12px 24px;
+    padding: 15px 30px;
     border: none;
     border-radius: 8px;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s ease;
     text-decoration: none;
     display: inline-block;
+    position: relative;
+    overflow: hidden;
+    
+    /* Apply both the color change and the glitter animation */
+    animation: changeColor 5s infinite;
   }
 
-  .orange-button:hover {
-    background-color: #e07b00; /* Slightly darker on hover */
+  /* Animation for changing colors every second */
+  @keyframes changeColor {
+    0%   { background-color: #FF8C00; } /* Orange */
+    20%  { background-color: #FF4500; } /* Orange-Red */
+    40%  { background-color: #9400D3; } /* Dark Violet */
+    60%  { background-color: #007BFF; } /* Blue */
+    80%  { background-color: #28A745; } /* Green */
+    100% { background-color: #FF8C00; } /* Back to Orange */
+  }
+
+  /* The Glitter Shine Effect */
+  .rainbow-glitter-button::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 20%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: rotate(30deg);
+    animation: glitter 2.5s infinite;
+  }
+
+  @keyframes glitter {
+    0% { left: -60%; }
+    30% { left: 120%; }
+    100% { left: 120%; }
+  }
+
+  /* Interactive hover effect */
+  .rainbow-glitter-button:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
   }
 </style>
 
 <a href="https://drive.google.com/file/d/1f_5I9wwnEBq_577NLcp-RCRvs67GcgYH/view?usp=drivesdk" 
-   class="orange-button" 
+   class="rainbow-glitter-button" 
    target="_blank">
-  Download App
+  Download the app
 </a>
 </div>
     <!-- Navigation Bar -->
