@@ -707,41 +707,48 @@
     </div>
 
     <!-- Withdraw Modal -->
-    <div class="modal fade" id="withdrawModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content login-modal">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title"><i class="fas fa-money-bill-wave"></i> Withdraw Balance</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+ <!-- Withdraw Modal -->
+<div class="modal fade" id="withdrawModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content login-modal">
+            <div class="modal-header border-0">
+                <h5 class="modal-title"><i class="fas fa-money-bill-wave"></i> Withdraw Balance</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Amount (৳)</label>
+                    <input type="number" class="form-control" id="withdrawAmount" placeholder="Enter amount" min="200" value="200">
+                    <small class="text-muted" id="minWithdrawalText">Minimum withdrawal: ৳200</small>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Amount (৳)</label>
-                        <input type="number" class="form-control" id="withdrawAmount" placeholder="Enter amount" min="200">
-                        <small class="text-muted" id="minWithdrawalText">Minimum withdrawal: ৳200</small>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Payment Method</label>
-                        <select class="form-select" id="withdrawMethod">
-                            <option value="bkash">bKash</option>
-                            <option value="nagad">Nagad</option>
-                            <option value="rocket">Rocket (DBBL)</option>
-                            <option value="upay">Upay</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Your Account Number</label>
-                        <input type="text" class="form-control" id="withdrawAccountNumber" placeholder="Enter your account number" required>
-                    </div>
-                    <div class="alert alert-warning">
-                        <p class="small mb-0"><i class="fas fa-info-circle"></i> 
-                            Withdrawal requests are processed manually by admin. You will receive payment within 24 hours.
-                        </p>
-                    </div>
-                    <button class="btn btn-success w-100" onclick="submitWithdrawRequest()">Submit Withdrawal Request</button>
+                
+                <div class="mb-3">
+                    <label class="form-label">Payment Method</label>
+                    <select class="form-select" id="withdrawMethod" >
+                        <option value="">Select Payment Method</option>
+                        <option value="bkash">bKash</option>
+                        <option value="nagad">Nagad</option>
+                        <option value="rocket">Rocket (DBBL)</option>
+                        <option value="upay">Upay</option>
+                    </select>
                 </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Your Account Number</label>
+                    <input type="text" class="form-control" id="withdrawAccountNumber" placeholder="Enter your account number" required>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <p class="small mb-0"><i class="fas fa-info-circle"></i> 
+                        Withdrawal requests are processed manually by admin. You will receive payment within 24 hours.
+                    </p>
+                  
+                </div>
+                
+                <button class="btn btn-success w-100" onclick="submitWithdrawRequest()">Submit Withdrawal Request</button>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- Update Profile Modal -->
