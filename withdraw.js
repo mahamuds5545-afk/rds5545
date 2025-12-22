@@ -1,36 +1,83 @@
-// ADMIN FUNCTION - Approve or Reject Withdrawal (to be called from admin panel)
-function processWithdrawal(requestId, action) {
-    // action can be 'approve' or 'reject'
+// Submit Withdrawal Request - CORRECTED VERSION
+function submitWithdrawRequest() {
+    if (!isLoggedIn) {
+        showError('Please login first');
+        return;
+    }
     
-    database.ref(`withdrawRequests/${requestId}`).once('value')
-        .then((snapshot) => {
-            if (!snapshot.exists()) {
-                showError('Withdrawal request not found');
-                return;
-            }
+    const amount = parseInt(document.getElementById('withdrawAmount').value);
+    const method = document.getElementById('withdrawMethod').value;
+    const accountNumber = document.getElementById('withdrawAccountNumber').value.trim();
+    const minWithdrawal = systemSettings.minWithdrawal || 200;
+    
+    if (!amount || amount < minWithdrawal) {
+        showError(`Minimum withdrawal amount is ৳${minWithdrawal}`);
+        return;
+    }
+    
+    if (!accountNumber) {
+        showError('Please enter your account number');
+        return;
+    }
+    
+    if (currentUser.balance < amount) {
+        showError('Insufficient balance');
+        return;
+    }
+    
+    // Generate unique request ID
+    const requestId = 'withdraw_' + Date.now();
+    
+    // Create withdrawal data
+    const withdrawData = {
+        username: currentUser.username,
+        amount: amount,
+        method: method,
+        accountNumber: accountNumber,
+        status: 'pending',
+        timestamp: Date.now(),
+        name: currentUser.name || currentUser.username
+    };
+    
+    // 1. First deduct the balance from user account
+    const newBalance = currentUser.balance - amount;
+    
+    database.ref(`users/${currentUser.username}/balance`).set(newBalance)
+        .then(() => {
+            // 2. Save the withdrawal request
+            return database.ref(`withdrawRequests/${requestId}`).set(withdrawData);
+        })
+        .then(() => {
+            // 3. Add transaction to user's history
+            return database.ref(`users/${currentUser.username}/transactions/${requestId}`).set({
+                type: 'withdrawal_request',
+                amount: -amount,
+                status: 'pending',
+                timestamp: Date.now(),
+                method: method,
+                accountNumber: accountNumber,
+                note: 'Withdrawal request submitted'
+            });
+        })
+        .then(() => {
+            // Update current user object
+            currentUser.balance = newBalance;
             
-            const request = snapshot.val();
-            const newStatus = action === 'approve' ? 'approved' : 'rejected';
+            // Update UI
+            updateUserUI();
             
-            // Update withdrawal request status
-            database.ref(`withdrawRequests/${requestId}/status`).set(newStatus)
-                .then(() => {
-                    // Update user's transaction status
-                    database.ref(`users/${request.username}/transactions/${requestId}/status`).set(newStatus);
-                    
-                    // If rejected, refund the amount
-                    if (action === 'reject') {
-                        return database.ref(`users/${request.username}/balance`).transaction((currentBalance) => {
-                            return (currentBalance || 0) + request.amount;
-                        });
-                    }
-                    return Promise.resolve();
-                })
-                .then(() => {
-                    showSuccess(`Withdrawal ${action}d successfully!`);
-                })
-                .catch((error) => {
-                    showError('Failed to process withdrawal: ' + error.message);
-                });
+            // Clear form
+            document.getElementById('withdrawAmount').value = '';
+            document.getElementById('withdrawAccountNumber').value = '';
+            
+            // Close modal
+            const modalElement = document.getElementById('withdrawModal');
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) modal.hide();
+            
+            showSuccess(`Withdrawal request of ৳${amount} submitted! Balance updated. Admin will process payment within 24 hours.`);
+        })
+        .catch((error) => {
+            showError('Failed to submit request: ' + error.message);
         });
 }
